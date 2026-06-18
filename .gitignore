@@ -1,0 +1,10 @@
+requirements.txt
+_pycache__/
+venv/
+node_modules/
+dist/
+build/
+*.log
+*.env
+*.pyc
+
