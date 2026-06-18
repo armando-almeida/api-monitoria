@@ -6,7 +6,7 @@ db = None
 
 async def connect_db():
     global client, db
-    mongo_uri = os.getenv("MONGO_URI")
+    mongo_uri = os.getenv("MONGO_UR")
     db_name = os.getenv("DB_NAME")
     
     client = AsyncIOMotorClient(mongo_uri)
