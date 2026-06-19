@@ -23,19 +23,23 @@ async def get_total():
 async def get_periodos(
     page: int = Query(1),
     limit: int = Query(10),
-    semestreInicio: float = Query(None),
-    semestreFim: float = Query(None),
+    semestreInicio: float = Query(...),
+    semestreFim: float = Query(...),
     curso: str = Query(None),
     departamento: str = Query(None)
 ):
-    if semestreInicio is None or semestreFim is None:
+    db = get_db()
+
+    skip = (page - 1) * limit
+
+    try:
+        semestreInicio = float(semestreInicio)
+        semestreFim = float(semestreFim)
+    except:
         raise HTTPException(
             status_code=400,
-            detail="semestreInicio e semestreFim são obrigatórios"
+            detail="semestreInicio e semestreFim devem ser números"
         )
-
-    db = get_db()
-    skip = (page - 1) * limit
 
     filtro = {
         "semestre": {
