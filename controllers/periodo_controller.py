@@ -1,7 +1,18 @@
 import math
 from fastapi import Query, HTTPException
 from config.database import get_db
+import math
 
+
+
+def sanitize_nans(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    elif isinstance(obj, dict):
+        return {k: sanitize_nans(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_nans(i) for i in obj]
+    return obj
 
 async def get_total():
     db = get_db()
@@ -64,11 +75,12 @@ async def get_periodos(
     )
 
     dados = await cursor.to_list(length=limit)
+    dados_limpos = sanitize_nans(dados)
 
     return {
         "total": total,
         "page": page,
         "limit": limit,
         "totalPages": math.ceil(total / limit) if limit > 0 else 0,
-        "data": dados
+        "data": dados_limpos
     }
