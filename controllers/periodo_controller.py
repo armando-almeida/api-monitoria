@@ -1,9 +1,6 @@
 import math
 from fastapi import Query, HTTPException
 from config.database import get_db
-import math
-
-
 
 def sanitize_nans(obj):
     if isinstance(obj, float) and math.isnan(obj):
@@ -65,7 +62,16 @@ async def get_periodos(
     if departamento:
         filtro["Departamento"] = departamento
 
+
     total = await db["dados_monitoria"].count_documents(filtro)
+
+
+    filtro_bolsista = {**filtro, "Modalidade": "Bolsista"}
+    filtro_voluntario = {**filtro, "Modalidade": "Voluntario"}
+    
+    total_bolsista_periodo = await db["dados_monitoria"].count_documents(filtro_bolsista)
+    total_voluntario_periodo = await db["dados_monitoria"].count_documents(filtro_voluntario)
+  
 
     cursor = (
         db["dados_monitoria"]
@@ -82,5 +88,7 @@ async def get_periodos(
         "page": page,
         "limit": limit,
         "totalPages": math.ceil(total / limit) if limit > 0 else 0,
+        "totalBolsistaPeriodo": total_bolsista_periodo,     
+        "totalVoluntarioPeriodo": total_voluntario_periodo, 
         "data": dados_limpos
     }
