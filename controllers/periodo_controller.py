@@ -63,7 +63,7 @@ async def get_periodos(
         filtro["Departamento"] = departamento
 
 
-    total = await db["dados_monitoria"].count_documents(filtro)
+    
 
 
     filtro_bolsista = {**filtro, "Modalidade": "Bolsista"}
@@ -72,6 +72,7 @@ async def get_periodos(
     total_bolsista_periodo = await db["dados_monitoria"].count_documents(filtro_bolsista)
     total_voluntario_periodo = await db["dados_monitoria"].count_documents(filtro_voluntario)
   
+    total = total_bolsista_periodo + total_voluntario_periodo
 
     cursor = (
         db["dados_monitoria"]
@@ -84,7 +85,7 @@ async def get_periodos(
     dados_limpos = sanitize_nans(dados)
 
     return {
-        "total": total,
+        "total_por_semestre_selecionado": total,
         "page": page,
         "limit": limit,
         "totalPages": math.ceil(total / limit) if limit > 0 else 0,
