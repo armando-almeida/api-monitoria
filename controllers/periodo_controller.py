@@ -79,12 +79,20 @@ async def get_periodos(
     if curso:
         filtro["Curso"] = curso
 
+
     if departamento:
-        filtro["Departamento"] = departamento
+   
+        lista_departamentos = [d.strip() for d in departamento.split(",")]
+        
+        # Limita a 3 departamentos
+        if len(lista_departamentos) > 3:
+            raise HTTPException(
+                status_code=400,
+                detail="Você pode filtrar por no máximo 3 departamentos simultaneamente."
+            )
+            
 
-
-    
-
+        filtro["Departamento"] = {"$in": lista_departamentos}
 
     filtro_bolsista = {**filtro, "Modalidade": "Bolsista"}
     filtro_voluntario = {**filtro, "Modalidade": "Voluntario"}
