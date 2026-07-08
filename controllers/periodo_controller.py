@@ -11,6 +11,26 @@ def sanitize_nans(obj):
         return [sanitize_nans(i) for i in obj]
     return obj
 
+
+async def get_all_dados():
+    db = get_db()
+
+    total_bolsista = await db["dados_monitoria"].count_documents({"Modalidade": "Bolsista"})
+    total_voluntario = await db["dados_monitoria"].count_documents({"Modalidade": "Voluntario"})
+    total_geral = total_bolsista + total_voluntario
+
+    cursor = db["dados_monitoria"].find({}, {"_id": 0})
+
+    dados = await cursor.to_list(length=None)
+    dados_limpos = sanitize_nans(dados)
+
+    return {
+        "totalGeral": total_geral,
+        "totalBolsista": total_bolsista,     
+        "totalVoluntario": total_voluntario, 
+        "data": dados_limpos
+    }
+
 async def get_total():
     db = get_db()
 
@@ -93,3 +113,6 @@ async def get_periodos(
         "totalVoluntarioPeriodo": total_voluntario_periodo, 
         "data": dados_limpos
     }
+
+
+    
