@@ -49,8 +49,8 @@ async def get_total():
 
 
 async def get_periodos(
-    page: int = Query(1),
-    limit: int = Query(10),
+    # page: int = Query(1),
+    # limit: int = Query(10),
     semestreInicio: float = Query(...),
     semestreFim: float = Query(...),
     curso: str = Query(None),
@@ -58,7 +58,7 @@ async def get_periodos(
 ):
     db = get_db()
 
-    skip = (page - 1) * limit
+    # skip = (page - 1) * limit
 
     try:
         semestreInicio = float(semestreInicio)
@@ -77,19 +77,20 @@ async def get_periodos(
     }
 
     if curso:
-        filtro["Curso"] = curso
+        lista_cursos = [c.strip() for c in curso.split(",")]
+        filtro["Curso"] = {"$in": lista_cursos}
 
 
     if departamento:
    
         lista_departamentos = [d.strip() for d in departamento.split(",")]
         
-        # Limita a 3 departamentos
-        if len(lista_departamentos) > 3:
-            raise HTTPException(
-                status_code=400,
-                detail="Você pode filtrar por no máximo 3 departamentos simultaneamente."
-            )
+        # # Limita a 3 departamentos
+        # if len(lista_departamentos) > 3:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail="Você pode filtrar por no máximo 3 departamentos simultaneamente."
+        #     )
             
 
         filtro["Departamento"] = {"$in": lista_departamentos}
@@ -105,20 +106,22 @@ async def get_periodos(
     cursor = (
         db["dados_monitoria"]
         .find(filtro, {"_id": 0})
-        .skip(skip)
-        .limit(limit)
+        # .skip(skip)
+        # .limit(limit)
     )
 
-    dados = await cursor.to_list(length=limit)
+    # dados = await cursor.to_list(length=limit)
+    dados = await cursor.to_list(length=None)
     dados_limpos = sanitize_nans(dados)
 
     return {
         "total_por_semestre_selecionado": total,
-        "page": page,
-        "limit": limit,
-        "totalPages": math.ceil(total / limit) if limit > 0 else 0,
+        # "page": page,
+        # "limit": limit,
+        # "totalPages": math.ceil(total / limit) if limit > 0 else 0,
         "totalBolsistaPeriodo": total_bolsista_periodo,     
         "totalVoluntarioPeriodo": total_voluntario_periodo, 
+        "quantidadeRegistros": len(dados_limpos),
         "data": dados_limpos
     }
 
